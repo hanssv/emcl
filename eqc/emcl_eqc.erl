@@ -306,6 +306,25 @@ prop_multi_pairing() ->
     end).
 
 %%
+%% Compress/Decompress
+%%
+
+prop_compress_g1() ->
+  ?FORALL(G1, gen_g1(),
+    begin
+      {ok, CG1} = emcl:compress_G1(G1),
+      is_binary(CG1)
+    end).
+
+prop_decompress_g1() ->
+  ?FORALL(G1, gen_g1(),
+    begin
+      {ok, CG1} = emcl:compress_G1(G1),
+      {ok, G1b} = emcl:decompress_G1(CG1),
+      is_eq(G1, G1b)
+    end).
+
+%%
 %% Generators
 %%
 

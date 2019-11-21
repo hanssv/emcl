@@ -36,8 +36,10 @@ decompress_test() ->
   {ok, _} = emcl:decompress_Fr(element(2, emcl:compress_Fr(emcl:rnd_Fr()))),
   {ok, _} = emcl:decompress_Fp(element(2, emcl:compress_Fp(emcl:rnd_Fp()))),
   {ok, _} = emcl:decompress_Fp2(element(2, emcl:compress_Fp2(emcl:rnd_Fp2()))),
-  %% {ok, _} = emcl:decompress_G1(element(2, emcl:compress_G1(emcl:rnd_G1()))),
-  %% {ok, _} = emcl:decompress_G2(element(2, emcl:compress_G2(emcl:rnd_G2()))),
+  {ok, G1} = emcl:bnG1_hash_and_map_to(<<"xyz">>),
+  {ok, _} = emcl:decompress_G1(element(2, emcl:compress_G1(G1))),
+  {ok, G2} = emcl:bnG2_hash_and_map_to(<<"xyz">>),
+  {ok, _} = emcl:decompress_G2(element(2, emcl:compress_G2(G2))),
   {ok, _} = emcl:decompress_Gt(element(2, emcl:compress_Gt(emcl:rnd_Gt()))),
 
   ok.

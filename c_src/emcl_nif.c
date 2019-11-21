@@ -154,7 +154,7 @@ static int get_fr(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFr *x){
 
   if(!enif_is_tuple(env, arg)) return 0;
 
-  ERL_NIF_TERM *array;
+  const ERL_NIF_TERM *array;
   int tsize;
   if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 2) return 0;
 
@@ -174,7 +174,7 @@ static int get_fp(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFp *x){
 
   if(!enif_is_tuple(env, arg)) return 0;
 
-  ERL_NIF_TERM *array;
+  const ERL_NIF_TERM *array;
   int tsize;
   if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 2) return 0;
 
@@ -194,7 +194,7 @@ static int get_fp2(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFp2 *x){
 
   if(!enif_is_tuple(env, arg)) return 0;
 
-  ERL_NIF_TERM *array;
+  const ERL_NIF_TERM *array;
   int tsize;
   if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 3) return 0;
 
@@ -211,7 +211,7 @@ static int get_g1(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnG1 *x){
 
   if(!enif_is_tuple(env, arg)) return 0;
 
-  ERL_NIF_TERM *array;
+  const ERL_NIF_TERM *array;
   int tsize;
   if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 4) return 0;
 
@@ -228,7 +228,7 @@ static int get_g2(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnG2 *x){
 
   if(!enif_is_tuple(env, arg)) return 0;
 
-  ERL_NIF_TERM *array;
+  const ERL_NIF_TERM *array;
   int tsize;
   if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 4) return 0;
 
@@ -245,7 +245,7 @@ static int get_gt(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnGT *x){
 
   if(!enif_is_tuple(env, arg)) return 0;
 
-  ERL_NIF_TERM *array;
+  const ERL_NIF_TERM *array;
   int tsize;
   if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 13) return 0;
 
@@ -1333,7 +1333,6 @@ ERL_NIF_TERM enif_mcl_bn_fp2_map_to_g2(ErlNifEnv *env, int argc, ERL_NIF_TERM co
 // -----
 static
 ERL_NIF_TERM enif_mcl_bn_fr_to_str(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-  ErlNifBinary in;
   mclBnFr x;
   char buf[FR_SIZE];
 
@@ -1420,11 +1419,10 @@ static
 ERL_NIF_TERM enif_mcl_bn_fr_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
     ErlNifBinary in;
     mclBnFr x;
-    char buf[FR_SIZE];
 
     CHECK_BINARY_ARG(in);
 
-    if(mclBnFr_setStr(&x, in.data, in.size, FX_MODE))
+    if(mclBnFr_setStr(&x, (const char *)in.data, in.size, FX_MODE))
       return error_tuple(env, "bad_string");
 
     return enif_return_fr(1, env, &x);
@@ -1437,7 +1435,7 @@ ERL_NIF_TERM enif_mcl_bn_fp_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 
     CHECK_BINARY_ARG(in);
 
-    if(mclBnFp_setStr(&x, in.data, in.size, FX_MODE))
+    if(mclBnFp_setStr(&x, (const char *)in.data, in.size, FX_MODE))
       return error_tuple(env, "bad_string");
 
     return enif_return_fp(1, env, &x);
@@ -1450,7 +1448,7 @@ ERL_NIF_TERM enif_mcl_bn_fp2_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM con
 
     CHECK_BINARY_ARG(in);
 
-    mclBnFp_setStr(&x.d[0], in.data, in.size, FX_MODE);
+    mclBnFp_setStr(&x.d[0], (const char *)in.data, in.size, FX_MODE);
     mclBnFp_clear(&x.d[1]);
 
     return enif_return_fp2(1, env, &x);
@@ -1463,7 +1461,7 @@ ERL_NIF_TERM enif_mcl_bn_g1_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 
     CHECK_BINARY_ARG(in);
 
-    mclBnG1_setStr(&x, in.data, in.size, GX_MODE);
+    mclBnG1_setStr(&x, (const char *)in.data, in.size, GX_MODE);
 
     return enif_return_g1(1, env, &x);
 }
@@ -1475,7 +1473,7 @@ ERL_NIF_TERM enif_mcl_bn_g2_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 
     CHECK_BINARY_ARG(in);
 
-    mclBnG2_setStr(&x, in.data, in.size, GX_MODE);
+    mclBnG2_setStr(&x, (const char *)in.data, in.size, GX_MODE);
 
     return enif_return_g2(1, env, &x);
 }
@@ -1487,7 +1485,7 @@ ERL_NIF_TERM enif_mcl_bn_gt_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 
     CHECK_BINARY_ARG(in);
 
-    mclBnGT_setStr(&x, in.data, in.size, GX_MODE);
+    mclBnGT_setStr(&x, (const char *)in.data, in.size, GX_MODE);
 
     return enif_return_gt(1, env, &x);
 }
@@ -1498,7 +1496,7 @@ ERL_NIF_TERM enif_mcl_bn_gt_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 static
 ERL_NIF_TERM enif_mcl_bn_fr_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
   mclBnFr x;
-  unsigned char buf[FR_SIZE];
+  char buf[FR_SIZE];
 
   if(!get_fr(env, argv[0], &x))
     return enif_make_badarg(env);
@@ -1512,7 +1510,7 @@ ERL_NIF_TERM enif_mcl_bn_fr_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 static
 ERL_NIF_TERM enif_mcl_bn_fp_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
   mclBnFp x;
-  unsigned char buf[FP_SIZE];
+  char buf[FP_SIZE];
 
   if(!get_fp(env, argv[0], &x))
     return enif_make_badarg(env);
@@ -1526,7 +1524,7 @@ ERL_NIF_TERM enif_mcl_bn_fp_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 static
 ERL_NIF_TERM enif_mcl_bn_fp2_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
   mclBnFp2 x;
-  unsigned char buf[FP2_SIZE];
+  char buf[FP2_SIZE];
 
   if(!get_fp2(env, argv[0], &x))
     return enif_make_badarg(env);
@@ -1540,7 +1538,7 @@ ERL_NIF_TERM enif_mcl_bn_fp2_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM con
 static
 ERL_NIF_TERM enif_mcl_bn_g1_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
   mclBnG1 x;
-  unsigned char buf[FP_SIZE];
+  char buf[FP_SIZE];
 
   if(!get_g1(env, argv[0], &x))
     return enif_make_badarg(env);
@@ -1554,7 +1552,7 @@ ERL_NIF_TERM enif_mcl_bn_g1_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 static
 ERL_NIF_TERM enif_mcl_bn_g2_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
   mclBnG2 x;
-  unsigned char buf[FP2_SIZE];
+  char buf[FP2_SIZE];
 
   if(!get_g2(env, argv[0], &x))
     return enif_make_badarg(env);
@@ -1568,7 +1566,7 @@ ERL_NIF_TERM enif_mcl_bn_g2_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
 static
 ERL_NIF_TERM enif_mcl_bn_gt_compress(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
   mclBnGT x;
-  unsigned char buf[12 * FP_SIZE];
+  char buf[12 * FP_SIZE];
 
   if(!get_gt(env, argv[0], &x))
     return enif_make_badarg(env);
@@ -1627,9 +1625,7 @@ ERL_NIF_TERM enif_mcl_bn_g1_decompress(ErlNifEnv *env, int argc, ERL_NIF_TERM co
   mclBnG1 x;
 
   CHECK_BINARY_ARG(bin);
-  int s = mclBnG1_deserialize(&x, bin.data, bin.size);
-  printf("BSize: %d  S: %d\r\n", bin.size, s);
-  if(!s)
+  if(!mclBnG1_deserialize(&x, bin.data, bin.size))
     return error_tuple(env, "decompression_failed");
 
   return enif_return_g1(1, env, &x);

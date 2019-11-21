@@ -50,119 +50,113 @@ int enif_mcl_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   else \
     return enif_make_atom(env, "false");
 
+static ERL_NIF_TERM mk_atom(ErlNifEnv *env, const char *str){
+  ERL_NIF_TERM atom;
+  if(!enif_make_existing_atom(env, str, &atom, ERL_NIF_LATIN1)){
+    atom = enif_make_atom(env, str);
+  }
+  return atom;
+}
+
 static
 ERL_NIF_TERM error_tuple(ErlNifEnv *env, char *error_atom) {
-  return enif_make_tuple2(env, enif_make_atom(env, "error"), enif_make_atom(env, error_atom));
+  return enif_make_tuple2(env, mk_atom(env, "error"), mk_atom(env, error_atom));
 }
 
 static
 ERL_NIF_TERM ok_tuple(ErlNifEnv *env, ERL_NIF_TERM t) {
-  return enif_make_tuple2(env, enif_make_atom(env, "ok"), t);
+  return enif_make_tuple2(env, mk_atom(env, "ok"), t);
 }
 
-static ERL_NIF_TERM enif_return_fr(int ok, ErlNifEnv *env, const mclBnFr *x){
+static ERL_NIF_TERM maybe_ok_tag(int ok, ErlNifEnv *env, ERL_NIF_TERM t){
+  if(ok){
+    return ok_tuple(env, t);
+  }
+  return t;
+}
+
+static ERL_NIF_TERM enif_return_fx(int ok, ErlNifEnv *env, const char *x,
+                                   const char *tag, unsigned int size) {
   ErlNifBinary bin;
 
-  if(!enif_alloc_binary(FR_SIZE, &bin)){
+  if(!enif_alloc_binary(size, &bin)){
     return enif_raise_exception(env, enif_make_atom(env, "out_of_memory"));
   }
 
-  memcpy(bin.data, x->d, bin.size);
+  memcpy(bin.data, x, bin.size);
 
-  ERL_NIF_TERM res = enif_make_tuple2(env, enif_make_atom(env, "fr"),
+  ERL_NIF_TERM res = enif_make_tuple2(env, mk_atom(env, tag),
                                            enif_make_binary(env, &bin));
-  if(ok){
-    return ok_tuple(env, res);
-  } else {
-    return res;
-  }
 
+  return maybe_ok_tag(ok, env, res);
+}
+
+
+static ERL_NIF_TERM enif_return_fr(int ok, ErlNifEnv *env, const mclBnFr *x){
+  return enif_return_fx(ok, env, (const char *)x->d, "fr", FR_SIZE);
 }
 
 static ERL_NIF_TERM enif_return_fp(int ok, ErlNifEnv *env, const mclBnFp *x){
-  ErlNifBinary bin;
-
-  if(!enif_alloc_binary(FP_SIZE, &bin)){
-    return enif_raise_exception(env, enif_make_atom(env, "out_of_memory"));
-  }
-
-  memcpy(bin.data, x->d, bin.size);
-
-  ERL_NIF_TERM res = enif_make_tuple2(env, enif_make_atom(env, "fp"),
-                                           enif_make_binary(env, &bin));
-  if(ok){
-    return ok_tuple(env, res);
-  } else {
-    return res;
-  }
-
+  return enif_return_fx(ok, env, (const char *)x->d, "fp", FP_SIZE);
 }
 
 static ERL_NIF_TERM enif_return_fp2(int ok, ErlNifEnv *env, const mclBnFp2 *x){
-  ERL_NIF_TERM res = enif_make_tuple3(env, enif_make_atom(env, "fp2"),
+  ERL_NIF_TERM res = enif_make_tuple3(env, mk_atom(env, "fp2"),
                                            enif_return_fp(0, env, &x->d[0]),
                                            enif_return_fp(0, env, &x->d[1]));
-  if(ok){
-    return ok_tuple(env, res);
-  } else {
-    return res;
-  }
+
+  return maybe_ok_tag(ok, env, res);
 }
 
 static ERL_NIF_TERM enif_return_g1(int ok, ErlNifEnv *env, const mclBnG1 *x){
-  ERL_NIF_TERM res = enif_make_tuple4(env, enif_make_atom(env, "g1"),
+  ERL_NIF_TERM res = enif_make_tuple4(env, mk_atom(env, "g1"),
                                            enif_return_fp(0, env, &x->x),
                                            enif_return_fp(0, env, &x->y),
                                            enif_return_fp(0, env, &x->z));
-  if(ok){
-    return ok_tuple(env, res);
-  } else {
-    return res;
-  }
+
+  return maybe_ok_tag(ok, env, res);
 }
 
 static ERL_NIF_TERM enif_return_g2(int ok, ErlNifEnv *env, const mclBnG2 *x){
-  ERL_NIF_TERM res = enif_make_tuple4(env, enif_make_atom(env, "g2"),
+  ERL_NIF_TERM res = enif_make_tuple4(env, mk_atom(env, "g2"),
                                            enif_return_fp2(0, env, &x->x),
                                            enif_return_fp2(0, env, &x->y),
                                            enif_return_fp2(0, env, &x->z));
-  if(ok){
-    return ok_tuple(env, res);
-  } else {
-    return res;
-  }
+
+  return maybe_ok_tag(ok, env, res);
 }
 
 static ERL_NIF_TERM enif_return_gt(int ok, ErlNifEnv *env, const mclBnGT *x){
   ERL_NIF_TERM arr[13];
 
-  arr[0] = enif_make_atom(env, "gt");
+  arr[0] = mk_atom(env, "gt");
   for(int i = 0; i < 12; i++){
     arr[i + 1] = enif_return_fp(0, env, &x->d[i]);
   }
 
   ERL_NIF_TERM res = enif_make_tuple_from_array(env, arr, 13);
 
-  if(ok){
-    return ok_tuple(env, res);
-  } else {
-    return res;
-  }
+  return maybe_ok_tag(ok, env, res);
+}
+
+static int check_tag(ErlNifEnv *env, ERL_NIF_TERM atom, const char *tag, unsigned int sz){
+  char buf[sz + 1];
+  if(!enif_get_atom(env, atom, buf, sz + 1, ERL_NIF_LATIN1)
+     || strncmp(tag, buf, sz)) return 0;
+
+  return 1;
 }
 
 static int get_fr(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFr *x){
-
-  if(!enif_is_tuple(env, arg)) return 0;
-
   const ERL_NIF_TERM *array;
-  int tsize;
-  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 2) return 0;
-
-  char buf[3];
-  if(!enif_get_atom(env, array[0], buf, 3, ERL_NIF_LATIN1) || strncmp("fr", buf, 2)) return 0;
-
   ErlNifBinary bin;
-  if(!enif_inspect_binary(env, array[1], &bin)) return 0;
+  int tsize;
+
+  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 2
+      || !check_tag(env, array[0], "fr", 2)
+      || !enif_inspect_binary(env, array[1], &bin)) {
+    return 0;
+  }
 
   memcpy(x->d, bin.data, bin.size);
 
@@ -171,18 +165,15 @@ static int get_fr(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFr *x){
 }
 
 static int get_fp(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFp *x){
-
-  if(!enif_is_tuple(env, arg)) return 0;
-
   const ERL_NIF_TERM *array;
-  int tsize;
-  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 2) return 0;
-
-  char buf[3];
-  if(!enif_get_atom(env, array[0], buf, 3, ERL_NIF_LATIN1) || strncmp("fp", buf, 2)) return 0;
-
   ErlNifBinary bin;
-  if(!enif_inspect_binary(env, array[1], &bin)) return 0;
+  int tsize;
+
+  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 2
+      || !check_tag(env, array[0], "fp", 2)
+      || !enif_inspect_binary(env, array[1], &bin)) {
+    return 0;
+  }
 
   memcpy(x->d, bin.data, bin.size);
 
@@ -191,73 +182,62 @@ static int get_fp(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFp *x){
 }
 
 static int get_fp2(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnFp2 *x){
-
-  if(!enif_is_tuple(env, arg)) return 0;
-
   const ERL_NIF_TERM *array;
   int tsize;
-  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 3) return 0;
 
-  char buf[4];
-  if(!enif_get_atom(env, array[0], buf, 4, ERL_NIF_LATIN1) || strncmp("fp2", buf, 3)) return 0;
-
-  if(!get_fp(env, array[1], &x->d[0]) || !get_fp(env, array[2], &x->d[1])) return 0;
+  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 3
+      || !check_tag(env, array[0], "fp2", 3)
+      || !get_fp(env, array[1], &x->d[0])
+      || !get_fp(env, array[2], &x->d[1])){
+    return 0;
+  }
 
   return 1;
-
 }
 
 static int get_g1(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnG1 *x){
-
-  if(!enif_is_tuple(env, arg)) return 0;
-
   const ERL_NIF_TERM *array;
   int tsize;
-  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 4) return 0;
 
-  char buf[3];
-  if(!enif_get_atom(env, array[0], buf, 3, ERL_NIF_LATIN1) || strncmp("g1", buf, 2)) return 0;
-
-  if(!get_fp(env, array[1], &x->x) || !get_fp(env, array[2], &x->y) || !get_fp(env, array[3], &x->z)) return 0;
+  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 4
+      || !check_tag(env, array[0], "g1", 2)
+      || !get_fp(env, array[1], &x->x)
+      || !get_fp(env, array[2], &x->y)
+      || !get_fp(env, array[3], &x->z)){
+    return 0;
+  }
 
   return 1;
-
 }
 
 static int get_g2(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnG2 *x){
-
-  if(!enif_is_tuple(env, arg)) return 0;
-
   const ERL_NIF_TERM *array;
   int tsize;
-  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 4) return 0;
 
-  char buf[3];
-  if(!enif_get_atom(env, array[0], buf, 3, ERL_NIF_LATIN1) || strncmp("g2", buf, 2)) return 0;
-
-  if(!get_fp2(env, array[1], &x->x) || !get_fp2(env, array[2], &x->y) || !get_fp2(env, array[3], &x->z)) return 0;
+  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 4
+      || !check_tag(env, array[0], "g2", 2)
+      || !get_fp2(env, array[1], &x->x)
+      || !get_fp2(env, array[2], &x->y)
+      || !get_fp2(env, array[3], &x->z)){
+    return 0;
+  }
 
   return 1;
-
 }
 
 static int get_gt(ErlNifEnv *env, ERL_NIF_TERM arg, mclBnGT *x){
-
-  if(!enif_is_tuple(env, arg)) return 0;
-
   const ERL_NIF_TERM *array;
   int tsize;
-  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 13) return 0;
-
-  char buf[3];
-  if(!enif_get_atom(env, array[0], buf, 3, ERL_NIF_LATIN1) || strncmp("gt", buf, 2)) return 0;
+  if(!enif_get_tuple(env, arg, &tsize, &array) || tsize != 13
+      || !check_tag(env, array[0], "gt", 2)){
+    return 0;
+  }
 
   for(int i = 0; i < 12; i++){
     if(!get_fp(env, array[i+1], &x->d[i])) return 0;
   }
 
   return 1;
-
 }
 
 static
@@ -1439,19 +1419,6 @@ ERL_NIF_TERM enif_mcl_bn_fp_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM cons
       return error_tuple(env, "bad_string");
 
     return enif_return_fp(1, env, &x);
-}
-
-static
-ERL_NIF_TERM enif_mcl_bn_fp2_from_str(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-    ErlNifBinary in;
-    mclBnFp2 x;
-
-    CHECK_BINARY_ARG(in);
-
-    mclBnFp_setStr(&x.d[0], (const char *)in.data, in.size, FX_MODE);
-    mclBnFp_clear(&x.d[1]);
-
-    return enif_return_fp2(1, env, &x);
 }
 
 static

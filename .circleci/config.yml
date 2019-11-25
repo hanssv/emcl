@@ -22,8 +22,8 @@ references:
     run:
       name: Install OS dependancies
       command: |
-        sudo apt-get update
-        sudo apt-get -qq -y install libgmp-dev autoconf build-essential
+        apt-get update
+        apt-get -qq -y install libgmp-dev autoconf build-essential
   build_test_steps: &build_test_steps
     run:
       name: Build and test
@@ -200,7 +200,7 @@ jobs:
           command: |
             brew update
             brew install gmp erlang@21
-            brew link erlang@21
+            brew link --force erlang@21
       - *save_macos_package_cache
       - *build_test_steps
 

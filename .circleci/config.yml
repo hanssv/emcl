@@ -74,7 +74,7 @@ jobs:
   build_win32:
     <<: *windows_container
     steps:
-      - systeminfo
+      - run: systeminfo
       - windows_install_deps:
           otp_install_path: << parameters.otp_install_path >>
           otp_version: << parameters.otp_version >>

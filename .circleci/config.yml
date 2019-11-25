@@ -28,13 +28,12 @@ references:
         sudo apt-get update
         sudo apt-get -qq -y install libgmp-dev autoconf build-essential
   build_test_steps: &build_test_steps
-    - checkout
-    - run:
-        name: Build and test
-        command: |
-          ./rebar3 get-deps
-          ./rebar3 compile
-          ./rebar3 eunit -v
+    run:
+      name: Build and test
+      command: |
+        ./rebar3 get-deps
+        ./rebar3 compile
+        ./rebar3 eunit -v
 
   windows_cache_version: &windows_cache_version "v1"
   windows_working_directory: &windows_working_directory C:\Users\circleci\project
@@ -114,7 +113,7 @@ commands:
           otp_version: << parameters.otp_version >>
       - run:
           name: Install Erlang/OTP << parameters.otp_version >>
-          command: scripts\windows\install_erlang << parameters.otp_version >> << parameters.install_path >>
+          command: .circleci\windows\install_erlang << parameters.otp_version >> << parameters.install_path >>
       - save_windows_erl_cache:
           otp_version: << parameters.otp_version >>
           install_path: << parameters.install_path >>

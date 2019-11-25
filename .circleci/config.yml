@@ -26,6 +26,7 @@ references:
     - run: "./rebar3 get-deps"
     - run: "./rebar3 compile"
     - run: "./rebar3 eunit -v"
+  windows_cache_version: &windows_cache_version "v1"
   windows_working_directory: &windows_working_directory C:\Users\circleci\project
   windows_env: &windows_env
     OTP_VERSION: << parameters.otp_version >>
@@ -51,6 +52,100 @@ references:
         type: string
     working_directory: *windows_working_directory
     environment: *windows_env
+
+commands:
+  restore_windows_erl_cache:
+    parameters:
+      windows_cache_version:
+        default: *windows_cache_version
+        type: string
+      otp_version:
+        type: string
+    steps:
+      - restore_cache:
+          keys:
+            - windows-erl<< parameters.otp_version >>-cache-<< parameters.windows_cache_version >>-{{ .Branch }}-
+            - windows-erl<< parameters.otp_version >>-cache-<< parameters.windows_cache_version >>-master-
+            - windows-erl<< parameters.otp_version >>-cache-<< parameters.windows_cache_version >>-
+  save_windows_erl_cache:
+    parameters:
+      windows_cache_version:
+        default: *windows_cache_version
+        type: string
+      install_path:
+        type: string
+      otp_version:
+        type: string
+    steps:
+      - save_cache:
+          key: windows-erl<< parameters.otp_version >>-cache-<< parameters.windows_cache_version >>-{{ .Branch }}-
+          paths:
+            - << parameters.install_path >>
+  install_win_otp:
+    parameters:
+      install_path:
+        type: string
+      otp_version:
+        type: string
+    steps:
+      - restore_windows_erl_cache:
+          otp_version: << parameters.otp_version >>
+      - run:
+          name: Install Erlang/OTP << parameters.otp_version >>
+          command: scripts\windows\install_erlang << parameters.otp_version >> << parameters.install_path >>
+      - save_windows_erl_cache:
+          otp_version: << parameters.otp_version >>
+          install_path: << parameters.install_path >>
+  restore_windows_package_cache:
+    parameters:
+      windows_cache_version:
+        default: *windows_cache_version
+        type: string
+    steps:
+     - restore_cache:
+        keys:
+          - windows-package-cache-<< parameters.windows_cache_version >>-{{ .Branch }}-
+          - windows-package-cache-<< parameters.windows_cache_version >>-master-
+          - windows-package-cache-<< parameters.windows_cache_version >>-
+  save_windows_package_cache:
+    parameters:
+      windows_cache_version:
+        type: string
+        default: *windows_cache_version
+      install_path:
+        type: string
+    steps:
+      - save_cache:
+          key: windows-package-cache-<< parameters.windows_cache_version >>-{{ .Branch }}-
+          paths:
+            - << parameters.install_path >>
+  install_win_msys2:
+    parameters:
+      install_path:
+        default: C:\tools\msys64
+        type: string
+    steps:
+      - restore_windows_package_cache
+      - run:
+          name: Install MSYS2
+          command: .circleci\windows\msys2_prepare
+      - save_windows_package_cache:
+          install_path: << parameters.install_path >>
+  windows_install_deps:
+    parameters:
+      msys_install_path:
+        type: string
+      otp_install_path:
+        type: string
+      otp_version:
+        type: string
+    steps:
+      - checkout
+      - install_win_otp:
+          install_path: << parameters.otp_install_path >>
+          otp_version: << parameters.otp_version >>
+      - install_win_msys2:
+          install_path: << parameters.msys_install_path >>
 
 jobs:
   build_otp20:

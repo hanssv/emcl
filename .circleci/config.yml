@@ -3,6 +3,23 @@ version: 2.1
 orbs:
   win: circleci/windows@1.0.0
 
+executors:
+  aebuilder_otp20:
+    docker:
+      - image: aeternity/builder
+        user: builder
+  aebuilder_otp21:
+    docker:
+      - image: aeternity/builder:otp21
+        user: builder
+  aebuilder_otp22:
+    docker:
+      - image: aeternity/builder:otp22
+        user: builder
+  builder_nix_alpine:
+    docker:
+      - image: nixorg/nix:circleci
+
 references:
   build_test_steps: &build_test_steps
     - checkout
@@ -34,23 +51,6 @@ references:
         type: string
     working_directory: *windows_working_directory
     environment: *windows_env
-
-executors:
-  aebuilder_otp20:
-    docker:
-      - image: aeternity/builder
-        user: builder
-  aebuilder_otp21:
-    docker:
-      - image: aeternity/builder:otp21
-        user: builder
-  aebuilder_otp22:
-    docker:
-      - image: aeternity/builder:otp22
-        user: builder
-  builder_nix_alpine:
-    docker:
-      - image: nixorg/nix:circleci
 
 jobs:
   build_otp20:
@@ -88,3 +88,14 @@ jobs:
       - run:
           name: Test
           command: .circleci\windows\test
+
+workflows:
+  version: 2
+  build-test:
+    jobs:
+      - build_otp20
+      - build_otp21
+      - build_otp22
+      - build_nix
+      - build_macos
+      - build_win32

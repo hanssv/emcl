@@ -4,18 +4,15 @@ orbs:
   win: circleci/windows@1.0.0
 
 executors:
-  aebuilder_otp20:
+  builder_otp20:
     docker:
-      - image: aeternity/builder
-        user: builder
-  aebuilder_otp21:
+      - image: erlang:20
+  builder_otp21:
     docker:
-      - image: aeternity/builder:otp21
-        user: builder
-  aebuilder_otp22:
+      - image: erlang:21
+  builder_otp22:
     docker:
-      - image: aeternity/builder:otp22
-        user: builder
+      - image: erlang:22
   builder_nix_alpine:
     docker:
       - image: nixorg/nix:circleci
@@ -113,7 +110,7 @@ commands:
           otp_version: << parameters.otp_version >>
       - run:
           name: Install Erlang/OTP << parameters.otp_version >>
-          command: .circleci\windows\install_erlang << parameters.otp_version >> << parameters.install_path >>
+          command: .\.circleci\windows\install_erlang << parameters.otp_version >> << parameters.install_path >>
       - save_windows_erl_cache:
           otp_version: << parameters.otp_version >>
           install_path: << parameters.install_path >>
@@ -170,19 +167,19 @@ commands:
 
 jobs:
   build_otp20:
-    executor: aebuilder_otp20
+    executor: builder_otp20
     steps:
       - checkout
       - *install_os_deps
       - *build_test_steps
   build_otp21:
-    executor: aebuilder_otp21
+    executor: builder_otp21
     steps:
       - checkout
       - *install_os_deps
       - *build_test_steps
   build_otp22:
-    executor: aebuilder_otp22
+    executor: builder_otp22
     steps:
       - checkout
       - *install_os_deps

@@ -200,7 +200,7 @@ jobs:
           command: |
             brew update
             brew install gmp erlang@21
-            brew link --force erlang@21
+            brew link --force gmp erlang@21
       - *save_macos_package_cache
       - *build_test_steps
 

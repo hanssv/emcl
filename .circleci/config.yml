@@ -54,13 +54,13 @@ references:
 
 jobs:
   build_otp20:
-    executor: aebuilder
+    executor: aebuilder_otp20
     steps: *build_test_steps
   build_otp21:
-    executor: aebuilder
+    executor: aebuilder_otp21
     steps: *build_test_steps
   build_otp22:
-    executor: aebuilder
+    executor: aebuilder_otp22
     steps: *build_test_steps
   build_nix:
     executor: builder_nix_alpine

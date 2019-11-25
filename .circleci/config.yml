@@ -23,9 +23,9 @@ executors:
 references:
   build_test_steps: &build_test_steps
     - checkout
-    - ./rebar3 get-deps
-    - ./rebar3 compile
-    - ./rebar3 eunit -v
+    - "./rebar3 get-deps"
+    - "./rebar3 compile"
+    - "./rebar3 eunit -v"
   windows_working_directory: &windows_working_directory C:\Users\circleci\project
   windows_env: &windows_env
     OTP_VERSION: << parameters.otp_version >>

@@ -1,0 +1,90 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@1.0.0
+
+references:
+  build_test_steps: &build_test_steps
+    - checkout
+    - ./rebar3 get-deps
+    - ./rebar3 compile
+    - ./rebar3 eunit -v
+  windows_working_directory: &windows_working_directory C:\Users\circleci\project
+  windows_env: &windows_env
+    OTP_VERSION: << parameters.otp_version >>
+    WIN_OTP_PATH: << parameters.otp_install_path >>
+    WIN_MSYS2_ROOT: << parameters.msys_install_path >>
+    MSYSCON: defterm
+    ANSICON: true
+    MSVC_VERSION: 14.22.27905
+    VCVARSALL: C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall
+  windows_container: &windows_container
+    executor:
+      name: win/vs2019
+      shell: cmd.exe
+    parameters:
+      msys_install_path:
+        default: C:\tools\msys64
+        type: string
+      otp_install_path:
+        default: C:\tools\erl
+        type: string
+      otp_version:
+        default: 21.3
+        type: string
+    working_directory: *windows_working_directory
+    environment: *windows_env
+
+executors:
+  aebuilder_otp20:
+    docker:
+      - image: aeternity/builder
+        user: builder
+  aebuilder_otp21:
+    docker:
+      - image: aeternity/builder:otp21
+        user: builder
+  aebuilder_otp22:
+    docker:
+      - image: aeternity/builder:otp22
+        user: builder
+  builder_nix_alpine:
+    docker:
+      - image: nixorg/nix:circleci
+
+jobs:
+  build_otp20:
+    executor: aebuilder
+    steps: *build_test_steps
+  build_otp21:
+    executor: aebuilder
+    steps: *build_test_steps
+  build_otp22:
+    executor: aebuilder
+    steps: *build_test_steps
+  build_nix:
+    executor: builder_nix_alpine
+    steps:
+      - checkout
+      - nix-shell -j auto --run "./rebar3 do get-deps, compile, eunit -v"
+  build_macos:
+    macos:
+      xcode: "10.0.0" # 10.0.0 is macOS 10.13.6
+    steps: *build_test_steps
+  build_win32:
+    <<: *windows_container
+    steps:
+      - systeminfo
+      - windows_install_deps:
+          otp_install_path: << parameters.otp_install_path >>
+          otp_version: << parameters.otp_version >>
+          msys_install_path: << parameters.msys_install_path >>
+      - run:
+          name: Prepare environment
+          command: .circleci\windows\msys2_prepare -v
+      - run:
+          name: Build
+          command: .circleci\windows\build
+      - run:
+          name: Test
+          command: .circleci\windows\test

@@ -21,6 +21,12 @@ executors:
       - image: nixorg/nix:circleci
 
 references:
+  install_os_deps: &install_os_deps
+    run:
+      name: Install OS dependancies
+      command: |
+        sudo apt-get update
+        sudo apt-get -qq -y install libgmp-dev autoconf build-essential
   build_test_steps: &build_test_steps
     - checkout
     - run:
@@ -70,12 +76,6 @@ references:
         - "/usr/local/Cellar"
 
 commands:
-  install_os_deps: &install_os_deps
-    run:
-      name: Install OS dependancies
-      command: |
-        sudo apt-get update
-        sudo apt-get -qq -y install libgmp-dev autoconf build-essential
   restore_windows_erl_cache:
     parameters:
       windows_cache_version:

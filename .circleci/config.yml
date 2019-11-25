@@ -30,7 +30,7 @@ references:
         default: C:\tools\erl
         type: string
       otp_version:
-        default: 21.3
+        default: "21.3"
         type: string
     working_directory: *windows_working_directory
     environment: *windows_env

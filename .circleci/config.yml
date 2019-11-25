@@ -23,9 +23,13 @@ executors:
 references:
   build_test_steps: &build_test_steps
     - checkout
-    - run: "./rebar3 get-deps"
-    - run: "./rebar3 compile"
-    - run: "./rebar3 eunit -v"
+    - run:
+        name: Build and test
+        command: |
+          ./rebar3 get-deps
+          ./rebar3 compile
+          ./rebar3 eunit -v
+
   windows_cache_version: &windows_cache_version "v1"
   windows_working_directory: &windows_working_directory C:\Users\circleci\project
   windows_env: &windows_env
@@ -53,7 +57,25 @@ references:
     working_directory: *windows_working_directory
     environment: *windows_env
 
+  macos_package_cache_key: &macos_package_cache_key macos-package-cache-v1
+  restore_macos_package_cache: &restore_macos_package_cache
+    restore_cache:
+      key: *macos_package_cache_key
+  save_macos_package_cache: &save_macos_package_cache
+    save_cache:
+      key: *macos_package_cache_key
+      paths:
+        - "/usr/local/Homebrew"
+        - "/usr/local/opt"
+        - "/usr/local/Cellar"
+
 commands:
+  install_os_deps: &install_os_deps
+    run:
+      name: Install OS dependancies
+      command: |
+        sudo apt-get update
+        sudo apt-get -qq -y install libgmp-dev autoconf build-essential
   restore_windows_erl_cache:
     parameters:
       windows_cache_version:
@@ -150,13 +172,22 @@ commands:
 jobs:
   build_otp20:
     executor: aebuilder_otp20
-    steps: *build_test_steps
+    steps:
+      - checkout
+      - *install_os_deps
+      - *build_test_steps
   build_otp21:
     executor: aebuilder_otp21
-    steps: *build_test_steps
+    steps:
+      - checkout
+      - *install_os_deps
+      - *build_test_steps
   build_otp22:
     executor: aebuilder_otp22
-    steps: *build_test_steps
+    steps:
+      - checkout
+      - *install_os_deps
+      - *build_test_steps
   build_nix:
     executor: builder_nix_alpine
     steps:
@@ -165,7 +196,17 @@ jobs:
   build_macos:
     macos:
       xcode: "10.0.0" # 10.0.0 is macOS 10.13.6
-    steps: *build_test_steps
+    steps:
+      - checkout
+      - *restore_macos_package_cache
+      - run:
+          name: Install required tools
+          command: |
+            brew update
+            brew install gmp erlang@21
+      - *save_macos_package_cache
+      - *build_test_steps
+
   build_win32:
     <<: *windows_container
     steps:

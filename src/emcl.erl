@@ -240,16 +240,23 @@ mk_G2(X1, X2, Y1, Y2, Z1, Z2) when is_integer(X1), is_integer(X2),
                                    is_integer(Z1), is_integer(Z2)  ->
   #g2{ x = mk_Fp2(X1, X2), y = mk_Fp2(Y1, Y2), z = mk_Fp2(Z1, X2) }.
 
--spec mk_Gt(D1 :: integer(), D2 :: integer(), D3 :: integer(), D4 :: integer(),
-            D5 :: integer(), D6 :: integer(), D7 :: integer(), D8 :: integer(),
-            D9 :: integer(), D10 :: integer(), D11 :: integer(), D12 :: integer()) -> mcl_bnGt().
+-spec mk_Gt(D1 :: integer() | mcl_bnFp(), D2 :: integer() | mcl_bnFp(),
+            D3 :: integer() | mcl_bnFp(), D4 :: integer() | mcl_bnFp(),
+            D5 :: integer() | mcl_bnFp(), D6 :: integer() | mcl_bnFp(),
+            D7 :: integer() | mcl_bnFp(), D8 :: integer() | mcl_bnFp(),
+            D9 :: integer() | mcl_bnFp(), D10 :: integer() | mcl_bnFp(),
+            D11 :: integer() | mcl_bnFp(), D12 :: integer() | mcl_bnFp()) -> mcl_bnGt().
 mk_Gt(D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11, D12)
     when is_integer(D1), is_integer(D2), is_integer(D3), is_integer(D4),
          is_integer(D5), is_integer(D6), is_integer(D7), is_integer(D8),
          is_integer(D9), is_integer(D10), is_integer(D11), is_integer(D12) ->
   #gt{ d1 = mk_Fp(D1), d2 = mk_Fp(D2), d3 = mk_Fp(D3), d4 = mk_Fp(D4),
        d5 = mk_Fp(D5), d6 = mk_Fp(D6), d7 = mk_Fp(D7), d8 = mk_Fp(D8),
-       d9 = mk_Fp(D9), d10 = mk_Fp(D10), d11 = mk_Fp(D11), d12 = mk_Fp(D12) }.
+       d9 = mk_Fp(D9), d10 = mk_Fp(D10), d11 = mk_Fp(D11), d12 = mk_Fp(D12) };
+mk_Gt(D1 = #fp{}, D2 = #fp{}, D3 = #fp{}, D4 = #fp{}, D5 = #fp{}, D6 = #fp{},
+      D7 = #fp{}, D8 = #fp{}, D9 = #fp{}, D10 = #fp{}, D11 = #fp{}, D12 = #fp{}) ->
+  #gt{ d1 = D1, d2 = D2, d3 = D3, d4 = D4, d5 = D5, d6 = D6,
+       d7 = D7, d8 = D8, d9 = D9, d10 = D10, d11 = D11, d12 = D12 }.
 
 %%%%%
 %% rnd_X

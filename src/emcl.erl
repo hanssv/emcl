@@ -33,6 +33,7 @@
         , bnFr_neg/1
         , bnFr_inv/1
         , bnFr_sqr/1
+        , bnFr_sqrt/1
         , bnFr_add/2
         , bnFr_sub/2
         , bnFr_mul/2
@@ -45,10 +46,15 @@
         , bnFr_is_negative/1
         , bnFr_lagrange_interpolation/2
         , bnFr_eval_polynomial/2
+        , bnFr_to_int/1
+        , bnFr_to_bin/1
+        , bnFr_from_str/1
+        , bnFr_hash_of/1
 
         , bnFp_neg/1
         , bnFp_inv/1
         , bnFp_sqr/1
+        , bnFp_sqrt/1
         , bnFp_add/2
         , bnFp_sub/2
         , bnFp_mul/2
@@ -59,10 +65,16 @@
         , bnFp_is_odd/1
         , bnFp_is_valid/1
         , bnFp_is_negative/1
+        , bnFp_to_int/1
+        , bnFp_to_bin/1
+        , bnFp_from_str/1
+        , bnFp_hash_of/1
+        , bnFp_map_to_G1/1
 
         , bnFp2_neg/1
         , bnFp2_inv/1
         , bnFp2_sqr/1
+        , bnFp2_sqrt/1
         , bnFp2_add/2
         , bnFp2_sub/2
         , bnFp2_mul/2
@@ -70,6 +82,10 @@
         , bnFp2_is_equal/2
         , bnFp2_is_zero/1
         , bnFp2_is_one/1
+        , bnFp2_to_int/1
+        , bnFp2_to_bin/1
+        , bnFp2_hash_of/1
+        , bnFp2_map_to_G2/1
 
         , bnG1_neg/1
         , bnG1_dbl/1
@@ -84,6 +100,10 @@
         , bnG1_is_valid_order/1
         , bnG1_lagrange_interpolation/2
         , bnG1_eval_polynomial/2
+        , bnG1_to_int/1
+        , bnG1_to_bin/1
+        , bnG1_from_str/1
+        , bnG1_hash_and_map_to/1
 
         , bnG2_neg/1
         , bnG2_dbl/1
@@ -98,10 +118,10 @@
         , bnG2_is_valid_order/1
         , bnG2_lagrange_interpolation/2
         , bnG2_eval_polynomial/2
-
-        , bnFr_sqrt/1
-        , bnFp_sqrt/1
-        , bnFp2_sqrt/1
+        , bnG2_to_int/1
+        , bnG2_to_bin/1
+        , bnG2_from_str/1
+        , bnG2_hash_and_map_to/1
 
         , bnGt_neg/1
         , bnGt_inv/1
@@ -116,25 +136,14 @@
         , bnGt_is_equal/2
         , bnGt_is_zero/1
         , bnGt_is_one/1
+        , bnGt_to_int/1
+        , bnGt_to_bin/1
+        , bnGt_from_str/1
 
         , bn_miller_loop/2
         , bn_miller_loop_vec/2
         , bn_final_exp/1
         , bn_pairing/2
-
-        , bnFr_hash_of/1
-        , bnFp_hash_of/1
-        , bnFp2_hash_of/1
-        , bnFp_map_to_G1/1
-        , bnFp2_map_to_G2/1
-        , bnG1_hash_and_map_to/1
-        , bnG2_hash_and_map_to/1
-
-        , bnFr_from_str/1
-        , bnFp_from_str/1
-        , bnG1_from_str/1
-        , bnG2_from_str/1
-        , bnGt_from_str/1
         ]).
 
 -export([pp/1, is_eq/2]).
@@ -395,6 +404,16 @@ bnFr_eval_polynomial([], _) -> {error, empty_list};
 bnFr_eval_polynomial(Cs, X = #fr{}) ->
   emcl_nif:mcl_bn_fr_eval_polynomial(Cs, X).
 
+-spec bnFr_to_int(X :: mcl_bnFr()) -> integer().
+bnFr_to_int(Fr) ->
+  {ok, BinInt} = emcl_nif:mcl_bn_fr_to_str(Fr),
+  binary_to_integer(BinInt).
+
+%% The binary is an integer in Montgomery representation
+-spec bnFr_to_bin(X :: mcl_bnFr()) -> binary().
+bnFr_to_bin(#fr{ d = Bin }) ->
+  Bin.
+
 %% Fp arithmetic
 -spec bnFp_neg(X :: mcl_bnFp()) -> mcl_bnFp().
 bnFp_neg(X = #fp{}) ->
@@ -452,6 +471,16 @@ bnFp_is_valid(X = #fp{}) ->
 bnFp_is_negative(X = #fp{}) ->
   emcl_nif:mcl_bn_fp_is_negative(X).
 
+-spec bnFp_to_int(X :: mcl_bnFp()) -> integer().
+bnFp_to_int(Fp) ->
+  {ok, BinInt} = emcl_nif:mcl_bn_fp_to_str(Fp),
+  binary_to_integer(BinInt).
+
+%% The binary is an integer in Montgomery representation
+-spec bnFp_to_bin(X :: mcl_bnFp()) -> binary().
+bnFp_to_bin(#fp{ d = Bin }) ->
+  Bin.
+
 %% Fp2 arithmetic
 -spec bnFp2_neg(X :: mcl_bnFp2()) -> mcl_bnFp2().
 bnFp2_neg(X = #fp2{}) ->
@@ -496,6 +525,15 @@ bnFp2_is_zero(X = #fp2{}) ->
 -spec bnFp2_is_one(X :: mcl_bnFp2()) -> boolean().
 bnFp2_is_one(X = #fp2{}) ->
   emcl_nif:mcl_bn_fp2_is_one(X).
+
+-spec bnFp2_to_int(X :: mcl_bnFp2()) -> {integer(), integer()}.
+bnFp2_to_int(#fp2{ d1 = D1, d2 = D2 }) ->
+  {bnFp_to_int(D1), bnFp_to_int(D2)}.
+
+%% The binary is an integer in Montgomery representation
+-spec bnFp2_to_bin(X :: mcl_bnFp2()) -> {binary(), binary()}.
+bnFp2_to_bin(#fp2{ d1 = D1, d2 = D2 }) ->
+  {bnFp_to_bin(D1), bnFp_to_bin(D2)}.
 
 %% G1 arithmetic
 -spec bnG1_neg(X :: mcl_bnG1()) -> mcl_bnG1().
@@ -561,6 +599,15 @@ bnG1_eval_polynomial([], _) -> {error, empty_list};
 bnG1_eval_polynomial(Cs, X = #fr{}) ->
   emcl_nif:mcl_bn_g1_eval_polynomial(Cs, X).
 
+-spec bnG1_to_int(X :: mcl_bnG1()) -> {integer(), integer(), integer()}.
+bnG1_to_int(#g1{ x = X, y = Y, z = Z}) ->
+  {bnFp_to_int(X), bnFp_to_int(Y), bnFp_to_int(Z)}.
+
+%% The binary is an integer in Montgomery representation
+-spec bnG1_to_bin(X :: mcl_bnG1()) -> {binary(), binary(), binary()}.
+bnG1_to_bin(#g1{ x = X, y = Y, z = Z}) ->
+  {bnFp_to_bin(X), bnFp_to_bin(Y), bnFp_to_bin(Z)}.
+
 %% G2 arithmetic
 -spec bnG2_neg(X :: mcl_bnG2()) -> mcl_bnG2().
 bnG2_neg(X = #g2{}) ->
@@ -625,6 +672,19 @@ bnG2_eval_polynomial([], _) -> {error, empty_list};
 bnG2_eval_polynomial(Cs, X = #fr{}) ->
   emcl_nif:mcl_bn_g2_eval_polynomial(Cs, X).
 
+-spec bnG2_to_int(X :: mcl_bnG2()) -> {{integer(), integer()},
+                                       {integer(), integer()},
+                                       {integer(), integer()}}.
+bnG2_to_int(#g2{ x = X, y = Y, z = Z}) ->
+  {bnFp2_to_int(X), bnFp2_to_int(Y), bnFp2_to_int(Z)}.
+
+%% The binary is an integer in Montgomery representation
+-spec bnG2_to_bin(X :: mcl_bnG2()) -> {{binary(), binary()},
+                                       {binary(), binary()},
+                                       {binary(), binary()}}.
+bnG2_to_bin(#g2{ x = X, y = Y, z = Z}) ->
+  {bnFp2_to_bin(X), bnFp2_to_bin(Y), bnFp2_to_bin(Z)}.
+
 %% Gt arithmetic
 -spec bnGt_neg(X :: mcl_bnGt()) -> mcl_bnGt().
 bnGt_neg(X = #gt{}) ->
@@ -680,6 +740,22 @@ bnGt_is_zero(X = #gt{}) ->
 bnGt_is_one(X = #gt{}) ->
   emcl_nif:mcl_bn_gt_is_one(X).
 
+-spec bnGt_to_int(X :: mcl_bnGt()) -> {integer(), integer(), integer(), integer(),
+                                       integer(), integer(), integer(), integer(),
+                                       integer(), integer(), integer(), integer()}.
+bnGt_to_int(Gt = #gt{}) ->
+  [gt | Fps ] = tuple_to_list(Gt),
+  list_to_tuple([bnFp_to_int(Fp) || Fp <- Fps]).
+
+%% The binary is an integer in Montgomery representation
+-spec bnGt_to_bin(X :: mcl_bnGt()) -> {binary(), binary(), binary(), binary(),
+                                       binary(), binary(), binary(), binary(),
+                                       binary(), binary(), binary(), binary()}.
+bnGt_to_bin(Gt = #gt{}) ->
+  [gt | Fps ] = tuple_to_list(Gt),
+  list_to_tuple([bnFp_to_bin(Fp) || Fp <- Fps]).
+
+%% Pairing operations
 -spec bn_miller_loop(X :: mcl_bnG1(), Y :: mcl_bnG2()) -> mcl_bnGt().
 bn_miller_loop(X = #g1{}, Y = #g2{}) ->
   emcl_nif:mcl_bn_miller_loop(X, Y).

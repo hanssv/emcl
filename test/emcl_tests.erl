@@ -284,3 +284,31 @@ lagrange_test() ->
   {ok, _} = emcl:bnG2_eval_polynomial(G2s, Fr),
 
   ok.
+
+construct_test() ->
+  I1 = 18590416872094568093245860,
+  I2 = 832110056234918438930585923958,
+  Fr = emcl:mk_Fr(I1),
+  Fp = emcl:mk_Fp(I2),
+
+  ?assertEqual(I1, emcl:bnFr_to_int(Fr)),
+  ?assertEqual(I2, emcl:bnFp_to_int(Fp)),
+
+  G1 = emcl:mk_G1(I1, I1, I1),
+  G2 = emcl:mk_G2(I1, I2, I1, I2, I1, I2),
+
+  ?assertEqual({I1, I1, I1}, emcl:bnG1_to_int(G1)),
+  ?assertEqual({{I1, I2}, {I1, I2}, {I1, I2}}, emcl:bnG2_to_int(G2)),
+
+  Gt = emcl:mk_Gt(I1, I2, I1, I2, I1, I2, I1, I2, I1, I2, I1, I2),
+  ?assertEqual({I1, I2, I1, I2, I1, I2, I1, I2, I1, I2, I1, I2},
+               emcl:bnGt_to_int(Gt)),
+
+  B1 = emcl:bnFp_to_bin(emcl:mk_Fp(I1)),
+  B2 = emcl:bnFp_to_bin(emcl:mk_Fp(I2)),
+
+  ?assertEqual({B1, B1, B1}, emcl:bnG1_to_bin(G1)),
+  ?assertEqual({{B1, B2}, {B1, B2}, {B1, B2}}, emcl:bnG2_to_bin(G2)),
+  ?assertEqual({B1, B2, B1, B2, B1, B2, B1, B2, B1, B2, B1, B2}, emcl:bnGt_to_bin(Gt)),
+
+  ok.

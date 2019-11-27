@@ -193,12 +193,16 @@
 -spec mk_Fr(X :: integer()) -> mcl_bnFr().
 mk_Fr(X) when is_integer(X) ->
   {ok, Fr} = emcl_nif:mcl_bn_fr_from_str(integer_to_binary(X)),
-  Fr.
+  Fr;
+mk_Fr(X = <<_:?FR_SIZE>>) ->
+  #fr{ d = X }.
 
 -spec mk_Fp(X :: integer()) -> mcl_bnFp().
 mk_Fp(X) when is_integer(X) ->
   {ok, Fp} = emcl_nif:mcl_bn_fp_from_str(integer_to_binary(X)),
-  Fp.
+  Fp;
+mk_Fp(X = <<_:?FP_SIZE>>) ->
+  #fp{ d = X }.
 
 -spec mk_Fp2(X1 :: integer() | mcl_bnFp(),
              X2 :: integer() | mcl_bnFp()) -> mcl_bnFp2().

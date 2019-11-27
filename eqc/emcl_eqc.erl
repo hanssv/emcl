@@ -305,6 +305,71 @@ prop_multi_pairing() ->
       is_eq(E1, E2)
     end).
 
+prop_measure() ->
+  ?FORALL({P1, Q1, P2, Q2, K, I}, {gen_g1(), gen_g1(), gen_g2(), gen_g2(),
+                                   gen_fr(), choose(0, 16#ffffffffffffffffffffffffffffffffff)},
+  begin
+    {T1_1, _} = timer:tc(fun() -> emcl:bnG1_neg(P1) end),
+    {T1_2, _} = timer:tc(fun() -> emcl:bnG1_normalize(P1) end),
+    {T1_3, _} = timer:tc(fun() -> emcl:bnG1_is_valid(P1) end),
+    {T1_4, _} = timer:tc(fun() -> emcl:bnG1_is_zero(P1) end),
+    {T1_5, _} = timer:tc(fun() -> emcl:bnG1_add(P1, Q1) end),
+    {T1_6, _} = timer:tc(fun() -> emcl:bnG1_mul(P1, K) end),
+
+    {T2_1, _} = timer:tc(fun() -> emcl:bnG2_neg(P2) end),
+    {T2_2, _} = timer:tc(fun() -> emcl:bnG2_normalize(P2) end),
+    {T2_3, _} = timer:tc(fun() -> emcl:bnG2_is_valid(P2) end),
+    {T2_4, _} = timer:tc(fun() -> emcl:bnG2_is_zero(P2) end),
+    {T2_5, _} = timer:tc(fun() -> emcl:bnG2_add(P2, Q2) end),
+    {T2_6, _} = timer:tc(fun() -> emcl:bnG2_mul(P2, K) end),
+
+    Gt  = emcl:bn_pairing(P1, P2),
+    Gt2 = emcl:bn_pairing(Q1, Q2),
+
+    {TT_1, _} = timer:tc(fun() -> emcl:bnGt_inv(Gt) end),
+    {TT_2, _} = timer:tc(fun() -> emcl:bnGt_add(Gt, Gt2) end),
+    {TT_3, _} = timer:tc(fun() -> emcl:bnGt_mul(Gt, Gt2) end),
+    {TT_4, _} = timer:tc(fun() -> emcl:bnGt_pow(Gt, K) end),
+    {TT_5, _} = timer:tc(fun() -> emcl:bnGt_is_one(Gt) end),
+    {TT_6, _} = timer:tc(fun() -> emcl:bn_pairing(P1, P2) end),
+    {TT_7, _} = timer:tc(fun() -> emcl:bn_miller_loop(P1, P2) end),
+    {TT_8, _} = timer:tc(fun() -> emcl:bn_final_exp(Gt) end),
+
+    {TC_1, Fr} = timer:tc(fun() -> emcl:mk_Fr(I) end),
+    {TC_2, Fp} = timer:tc(fun() -> emcl:mk_Fp(I) end),
+    {TC_3, _} = timer:tc(fun() ->  emcl:pp(Fr) end),
+    {TC_4, _} = timer:tc(fun() ->  emcl:pp(Fp) end),
+
+    measure(g1_neg__, T1_1,
+    measure(g1_norm_, T1_2,
+    measure(g1_valid, T1_3,
+    measure(g1_zero_, T1_4,
+    measure(g1_add__, T1_5,
+    measure(g1_mul__, T1_6,
+    measure(g2_neg__, T2_1,
+    measure(g2_norm_, T2_2,
+    measure(g2_valid, T2_3,
+    measure(g2_zero_, T2_4,
+    measure(g2_add__, T2_5,
+    measure(g2_mul__, T2_6,
+    measure(gt_inv__, TT_1,
+    measure(gt_add__, TT_2,
+    measure(gt_mul__, TT_3,
+    measure(gt_pow__, TT_4,
+    measure(gt_one__, TT_5,
+    measure(gt_pair_, TT_6,
+    measure(gt_mill_, TT_7,
+    measure(gt_final, TT_8,
+    measure(c_i2fr__, TC_1,
+    measure(c_i2fp__, TC_2,
+    measure(c_fr2i__, TC_3,
+    measure(c_fp2i__, TC_4,
+            true))))))))))))))))))))))))
+    end).
+
+
+
+
 %%
 %% Compress/Decompress
 %%

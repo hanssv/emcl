@@ -1203,12 +1203,12 @@ ERL_NIF_TERM enif_mcl_bn_fp2_map_to_g2(ErlNifEnv *env, int argc, ERL_NIF_TERM co
 
 static
 ERL_NIF_TERM enif_mcl_bn_fr_to_str(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-  MCL_BN_TO_STR(mclBnFr, FR_SIZE, get_fr, mclBnFr_getStr, FX_MODE)
+  MCL_BN_TO_STR(mclBnFr, FR_SIZE * 2, get_fr, mclBnFr_getStr, FX_MODE)
 }
 
 static
 ERL_NIF_TERM enif_mcl_bn_fp_to_str(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-  MCL_BN_TO_STR(mclBnFp, FP_SIZE, get_fp, mclBnFp_getStr, FX_MODE)
+  MCL_BN_TO_STR(mclBnFp, FP_SIZE * 2, get_fp, mclBnFp_getStr, FX_MODE)
 }
 
 static

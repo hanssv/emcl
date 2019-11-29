@@ -13,6 +13,9 @@ mk_test() ->
   ok.
 
 rnd_test() ->
+  Is = [ emcl:random_int(2) || _ <- lists:seq(1, 30) ],
+  ?assertEqual([0, 1], lists:usort(Is)),
+
   ?assertEqual(fr,  element(1, emcl:rnd_Fr())),
   ?assertEqual(fp,  element(1, emcl:rnd_Fp())),
   ?assertEqual(fp2, element(1, emcl:rnd_Fp2())),

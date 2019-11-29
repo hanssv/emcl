@@ -148,6 +148,10 @@
 
 -export([pp/1, is_eq/2]).
 
+-ifdef(TEST).
+-export([random_int/1]).
+-endif.
+
 -define(FR_SIZE, 256). %% 4 * 64
 -define(FP_SIZE, 384). %% 6 * 64
 -define(FR_ZERO, <<0:?FP_SIZE>>).
@@ -263,11 +267,11 @@ mk_Gt(D1 = #fp{}, D2 = #fp{}, D3 = #fp{}, D4 = #fp{}, D5 = #fp{}, D6 = #fp{},
 %%%%%
 -spec rnd_Fr() -> mcl_bnFr().
 rnd_Fr() ->
-  emcl_nif:mcl_bn_fr_random().
+  mk_Fr(random_fr()).
 
 -spec rnd_Fp() -> mcl_bnFp().
 rnd_Fp() ->
-  emcl_nif:mcl_bn_fp_random().
+  mk_Fp(random_fp()).
 
 -spec rnd_Fp2() -> mcl_bnFp2().
 rnd_Fp2() ->
@@ -845,4 +849,14 @@ is_eq(A = #gt{}, B = #gt{}) -> bnGt_is_equal(A, B).
 %%====================================================================
 %% Internal functions
 %%====================================================================
+-define(MAX_FR, 16#73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001).
+-define(MAX_FP, 16#1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab).
+random_fr() ->
+  random_int(?MAX_FR).
 
+random_fp() ->
+  random_int(?MAX_FP).
+
+random_int(MaxInt) ->
+  <<X:48/unsigned-integer-unit:8>> = crypto:strong_rand_bytes(48),
+  X rem MaxInt.

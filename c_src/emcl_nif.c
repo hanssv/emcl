@@ -1354,27 +1354,6 @@ ERL_NIF_TERM enif_mcl_bn_gt_decompress(ErlNifEnv *env, int argc, ERL_NIF_TERM co
   MCL_BN_DECOMPRESS(mclBnGT, mclBnGT_deserialize, enif_return_gt)
 }
 
-// -----
-// Random generation
-// -----
-static
-ERL_NIF_TERM enif_mcl_bn_fr_random(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-  mclBnFr x;
-
-  mclBnFr_setByCSPRNG(&x);
-
-  return enif_return_fr(0, env, &x);
-}
-
-static
-ERL_NIF_TERM enif_mcl_bn_fp_random(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-  mclBnFp x;
-
-  mclBnFp_setByCSPRNG(&x);
-
-  return enif_return_fp(0, env, &x);
-}
-
 /* Tie the knot to the Erlang world */
 static ErlNifFunc nif_funcs[] = {
   {"mcl_bn_miller_loop", 2, enif_mcl_bn_miller_loop},
@@ -1495,9 +1474,6 @@ static ErlNifFunc nif_funcs[] = {
   {"mcl_bn_g1_decompress",  1, enif_mcl_bn_g1_decompress},
   {"mcl_bn_g2_decompress",  1, enif_mcl_bn_g2_decompress},
   {"mcl_bn_gt_decompress",  1, enif_mcl_bn_gt_decompress},
-
-  {"mcl_bn_fr_random", 0, enif_mcl_bn_fr_random},
-  {"mcl_bn_fp_random", 0, enif_mcl_bn_fp_random},
 
   {"mcl_bn_fr_hash_of", 1, enif_mcl_bn_fr_hash_of},
   {"mcl_bn_fp_hash_of", 1, enif_mcl_bn_fp_hash_of},

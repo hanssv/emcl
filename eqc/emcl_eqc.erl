@@ -54,6 +54,14 @@ prop_fr_mul_associative() ->
     is_eq(emcl:bnFr_mul(X, emcl:bnFr_mul(Y, Z)),
           emcl:bnFr_mul(emcl:bnFr_mul(X, Y), Z))).
 
+prop_fr_roundtrip1() ->
+  ?FORALL(X, gen_number(),
+    equals(X, emcl:bnFr_to_int(i2fr(X)))).
+
+prop_fr_roundtrip2() ->
+  ?FORALL(YFr, gen_fr(),
+    is_eq(YFr, i2fr(emcl:bnFr_to_int(YFr)))).
+
 %%
 %% Fp tests
 %%
@@ -394,7 +402,7 @@ prop_decompress_g1() ->
 %%
 
 gen_number() ->
-  weighted_default({5, choose(1, 20)}, {1, choose(1, 10000000)}).
+  weighted_default({5, choose(1, 20)}, {1, choose(1, 1000000000000)}).
 
 gen_fr() ->
   weighted_default({2, ?LET(X, choose(1, 500), i2fr(X))},

@@ -10,6 +10,11 @@ int enif_mcl_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
 #define FP_SIZE 48
 #define FP2_SIZE (2 * FP_SIZE)
 #define FR_SIZE 32
+
+// 3.32.. bits per decimal number + space for \0
+#define FR_DECIMAL_MAXSIZE 80
+#define FP_DECIMAL_MAXSIZE 120
+
 #define G1_SIZE 1024
 #define G2_SIZE 1024
 #define GT_SIZE 2048
@@ -1203,12 +1208,12 @@ ERL_NIF_TERM enif_mcl_bn_fp2_map_to_g2(ErlNifEnv *env, int argc, ERL_NIF_TERM co
 
 static
 ERL_NIF_TERM enif_mcl_bn_fr_to_str(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-  MCL_BN_TO_STR(mclBnFr, FR_SIZE * 2, get_fr, mclBnFr_getStr, FX_MODE)
+  MCL_BN_TO_STR(mclBnFr, FR_DECIMAL_MAXSIZE, get_fr, mclBnFr_getStr, FX_MODE)
 }
 
 static
 ERL_NIF_TERM enif_mcl_bn_fp_to_str(ErlNifEnv *env, int argc, ERL_NIF_TERM const argv[]) {
-  MCL_BN_TO_STR(mclBnFp, FP_SIZE * 2, get_fp, mclBnFp_getStr, FX_MODE)
+  MCL_BN_TO_STR(mclBnFp, FP_DECIMAL_MAXSIZE, get_fp, mclBnFp_getStr, FX_MODE)
 }
 
 static
